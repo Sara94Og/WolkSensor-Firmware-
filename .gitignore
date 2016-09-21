@@ -10,5 +10,6 @@
 *.elf
 *.eep
 .vs
+*.cproj
 Debug
 Release
