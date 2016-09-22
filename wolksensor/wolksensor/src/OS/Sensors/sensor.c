@@ -64,6 +64,14 @@ static bool get_humidity(int16_t *value)
 	return true;
 }
 
+static bool get_x_axis(int16_t *value)
+{
+	*value = Get_X_Axis()*10;
+
+	return true;
+
+}
+
 bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 {
 	LOG(1, "Getting sensor values");
@@ -71,11 +79,19 @@ bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 	sensor_twi.interface->MASTER.BAUD = TWI_MasterBaud(CLK_24MHZ);
 
 	BME280_poll();
+	LSM303_poll();
 	
 	while (sensor_twi.status != TWIM_STATUS_READY) {}
 		
 	sensor_state_t atmo_sensors_states[NUMBER_OF_SENSORS];
 	
+	LOG(1,"Sensor IDs : \n");
+
+	for(uint8_t k = 0; k < sensors_count; k++)
+	{
+		LOG_PRINT(1,PSTR("Sensors : %c\n "),sensors_ids[k]);
+	}
+
 	for(uint8_t i = 0; i < sensors_count; i++)
 	{
 		switch(sensors_ids[i])
@@ -115,6 +131,43 @@ bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 				
 				break;
 			}
+			case 'X':
+			{
+					LOG(1,"Getting X axis...");
+
+					atmo_sensors_states[i].id = 'X';
+					if(!get_x_axis(&atmo_sensors_states[i].value))
+					{
+						atmo_sensors_states[i].value = 0;
+					}
+
+					break;
+			}
+			case 'M':
+			{
+				LOG(1,"Movement detected while getting sensor states...");
+
+				atmo_sensors_states[i].id = 'M';
+
+				break;
+			}
+
+			//case 'ACL_Y':
+			//{
+				//LOG(1,"Getting Y axis...");
+				//
+				//atmo_sensors_states[i].id = 'ACL_Y';
+				//
+				//break;
+			//}
+			//case 'ACL_Z':
+			//{
+				//LOG(1,"Getting Z axis...");
+				//
+				//atmo_sensors_states[i].id = 'ACL_Z';
+				//
+				//break;
+			//}
 		}
 	}
 	

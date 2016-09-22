@@ -210,9 +210,22 @@ static void set_sensors_types(void)
 	sensors[2].type = VALUE_ON_DEMAND;
 	sensors[2].alarm_type = ALARM_TYPE_NOTIFY_ONCE;
 	
-	sensors[3].id = 'M';
-	sensors[3].type = NOTIFIES_VALUE;
-	sensors[3].alarm_type = ALARM_TYPE_NOTIFY_ALWAYS;
+	sensors[3].id = 'X';
+	sensors[3].type = VALUE_ON_DEMAND;
+	sensors[3].alarm_type = ALARM_TYPE_NOTIFY_ONCE;
+
+	sensors[4].id = 'M';
+	sensors[4].type = NOTIFIES_VALUE;
+	sensors[4].alarm_type = ALARM_TYPE_NOTIFY_ALWAYS;
+
+	//sensors[5].id = 'ACL_Y';
+	//sensors[5].type = VALUE_ON_DEMAND;
+	//sensors[5].alarm_type = ALARM_TYPE_NOTIFY_ONCE;
+	//
+	//sensors[6].id = 'ACL_Z';
+	//sensors[6].type = VALUE_ON_DEMAND;
+	//sensors[6].alarm_type = ALARM_TYPE_NOTIFY_ONCE;
+
 }
 
 int main(void)

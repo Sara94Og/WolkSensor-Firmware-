@@ -342,7 +342,6 @@ bool BME280_init() {
 	char response, tmp;
 	
 	tmp = BME280_GetID();
-	LOG_PRINT(1, PSTR("\n\r tmp: 0x%x"), tmp);
 	if (tmp != BME280_CHIP_ID)
 	{
 		LOG(1, "\n\rCHIP ERROR");

@@ -30,7 +30,7 @@
 
 #define NUMBER_OF_ACTUATORS 0 
 
-#define NUMBER_OF_SENSORS 4
+#define NUMBER_OF_SENSORS	5 //P,T,H,M,X,Y,Z
 
 #define LOG_FORMAT "%S\r\n"
 
