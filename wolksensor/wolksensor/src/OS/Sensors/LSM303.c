@@ -52,6 +52,16 @@ static char I2C_ReadRegisterLSM(char rAddr) {
 	return sensor_twi.readData[0];
 }
 
+int16_t GetX()
+{
+	uint8_t xlow = I2C_ReadRegisterLSM(0x28);
+	uint8_t xhigh = I2C_ReadRegisterLSM(0x29);
+
+	int16_t xaxis = (int16_t)(((xhigh << 8) | xlow) >> 4);
+
+	return xaxis;
+}
+
 bool LSM303_init(void) {
 	bool  timeout=false;
 	start_auxTimeout(10);
@@ -135,6 +145,8 @@ void LSM303_poll(void)
 
 	uint8_t status_reg = I2C_ReadRegisterLSM(0x27);
 	LOG_PRINT(1,PSTR("Status : 0x%x\n"),status_reg);
+
+	GetX();
 
 	sensor_ready = true;
 

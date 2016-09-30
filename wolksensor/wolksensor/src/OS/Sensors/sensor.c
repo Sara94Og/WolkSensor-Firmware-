@@ -64,6 +64,13 @@ static bool get_humidity(int16_t *value)
 	return true;
 }
 
+static bool get_x_axis(int16_t *value)
+{
+	*value = GetX()*10;
+
+	return true;
+}
+
 bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 {
 	LOG(1, "Getting sensor values");
@@ -71,6 +78,7 @@ bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 	sensor_twi.interface->MASTER.BAUD = TWI_MasterBaud(CLK_24MHZ);
 
 	BME280_poll();
+	LSM303_poll();
 	
 	while (sensor_twi.status != TWIM_STATUS_READY) {}
 		
@@ -113,6 +121,18 @@ bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 					atmo_sensors_states[i].value = 0;
 				}
 				
+				break;
+			}
+			case 'X' :
+			{
+				LOG(1,"Getting X axis");
+
+				atmo_sensors_states[i].id = 'X';
+				if(!get_x_axis(&atmo_sensors_states[i].value))
+				{
+					atmo_sensors_states[i].value = 0;
+				}
+
 				break;
 			}
 		}

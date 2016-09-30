@@ -20,4 +20,6 @@ bool waiting_movement_sensor_enable_timeout(void);
 void disable_movement(void);
 void enable_movement(void);
 
+int16_t GetX();
+
 #endif /* LSM303_H_ */
