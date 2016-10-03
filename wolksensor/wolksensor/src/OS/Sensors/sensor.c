@@ -73,6 +73,20 @@ static bool get_x_axis(int16_t *value)
 	return true;
 }
 
+static bool get_y_axis(int16_t *value)
+{
+	*value = GetY()*10;
+
+	return true;
+}
+
+static bool get_z_axis(int16_t *value)
+{
+	*value = GetZ()*10;
+
+	return true;
+}
+
 bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 {
 	LOG(1, "Getting sensor values");

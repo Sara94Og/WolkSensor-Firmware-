@@ -21,5 +21,7 @@ void disable_movement(void);
 void enable_movement(void);
 
 int16_t GetX();
+int16_t GetY();
+int16_t GetZ();
 
 #endif /* LSM303_H_ */

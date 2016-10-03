@@ -59,14 +59,50 @@ int16_t GetX()
 	uint8_t xlow = I2C_ReadRegisterLSM(0xA8);
 	uint8_t xhigh = I2C_ReadRegisterLSM(0xA9);
 
-	int16_t xaxis = (int16_t)((xlow | (xhigh << 8)) >> 4);
+	int16_t xaxis = (int16_t)((xlow | (xhigh << 8)));
 
-	LOG_PRINT(1,PSTR("X axis high : 0x%x\n"),xhigh);
-	LOG_PRINT(1,PSTR("X axis low : 0x%x\n"),xlow);
+	//LOG_PRINT(1,PSTR("X axis high : 0x%x\n"),xhigh);
+	//LOG_PRINT(1,PSTR("X axis low : 0x%x\n"),xlow);
+
+	xaxis = ((xaxis - 60) >> 14) + 1;
 
 	LOG_PRINT(1,PSTR("X axis : %d\n"),xaxis);
 
 	return xaxis;
+}
+
+int16_t GetY()
+{
+	uint8_t ylow = I2C_ReadRegisterLSM(0xAA);
+	uint8_t yhigh = I2C_ReadRegisterLSM(0xAB);
+
+	int16_t yaxis = (int16_t)((ylow | (yhigh << 8)));
+
+	//LOG_PRINT(1,PSTR("Y axis high : 0x%x\n"),yhigh);
+	//LOG_PRINT(1,PSTR("Y axis low : 0x%x\n"),ylow);
+
+	yaxis = ((yaxis - 60) >> 14) + 1;
+
+	LOG_PRINT(1,PSTR("Y axis : %d\n"),yaxis);
+
+	return yaxis;
+}
+
+int16_t GetZ()
+{
+	uint8_t zlow = I2C_ReadRegisterLSM(0xAC);
+	uint8_t zhigh = I2C_ReadRegisterLSM(0xAD);
+
+	int16_t zaxis = (int16_t)((zlow | (zhigh << 8)));
+
+	//LOG_PRINT(1,PSTR("Z axis high : 0x%x\n"),zhigh);
+	//LOG_PRINT(1,PSTR("Z axis low : 0x%x\n"),zlow);
+
+	zaxis = ((zaxis - 60) >> 14) + 1;
+
+	LOG_PRINT(1,PSTR("Z axis : %d\n"),zaxis);
+
+	return zaxis;
 }
 
 bool LSM303_init(void) {
@@ -138,6 +174,8 @@ bool LSM303_init(void) {
 	LOG(1,"LSM303 detected");
 
 	GetX();
+	GetY();
+	GetZ();
 
 	movement_sensor_enable();
 
@@ -174,7 +212,8 @@ void LSM303_poll(void)
 	LOG_PRINT(1,PSTR("Status : 0x%x\n"),status_reg);
 
 	GetX();
-
+	GetY();
+	GetZ();
 
 	sensor_ready = true;
 
