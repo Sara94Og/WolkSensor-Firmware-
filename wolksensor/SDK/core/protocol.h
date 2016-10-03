@@ -51,4 +51,6 @@ bool append_ssl_status(bool ssl_status, circular_buffer_t* response_buffer);
 bool append_mqtt_username(char* id, circular_buffer_t* response_buffer);
 bool append_mqtt_password(char* password, circular_buffer_t* response_buffer);
 
+bool append_accl_enabled(bool enabled, circular_buffer_t* response_buffer);
+
 #endif /* PROTOCOL_H_ */

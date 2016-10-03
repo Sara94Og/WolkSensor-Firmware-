@@ -44,6 +44,7 @@ typedef enum
 
 	CFG_MOVEMENT,
 	CFG_ATMO,
+	CFG_ACCL,
 	
 	CFG_STATE,
 	
@@ -97,6 +98,8 @@ extern uint16_t server_port;
 extern bool movement_status;
 extern bool atmo_status;
 
+extern bool accl_status;
+
 extern uint8_t knx_physical_address[2];
 extern uint8_t knx_group_address[2];
 
@@ -129,6 +132,8 @@ bool load_server_port(void);
 
 bool load_movement_status(void);
 bool load_atmo_status(void);
+
+bool load_accl_status(void);
 
 bool load_knx_physical_address(void);
 bool load_knx_group_address(void);

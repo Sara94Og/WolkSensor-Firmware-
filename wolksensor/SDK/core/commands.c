@@ -189,6 +189,22 @@ command_execution_result_t cmd_atmo(command_t* command, circular_buffer_t* respo
 	return COMMAND_EXECUTED_SUCCESSFULLY;
 }
 
+command_execution_result_t cmd_accl(command_t* command, circular_buffer_t* response_buffer)
+{
+	LOG(1,"Executing command ACCL");
+
+	if(command->has_argument && (accl_status != command->argument.bool_argument))
+	{
+		accl_status = command->argument.bool_argument;
+		global_dependencies.config_write(&accl_status, CFG_ACCL, 1, sizeof(accl_status));
+	}
+
+	append_accl_enabled(atmo_status, response_buffer);
+	return COMMAND_EXECUTED_SUCCESSFULLY;
+
+}
+
+
 command_execution_result_t cmd_system(command_t* command, circular_buffer_t* response_buffer)
 {
 	LOG(1, "Executing command SYSTEM");
@@ -678,6 +694,10 @@ command_execution_result_t execute_command(command_t* command, circular_buffer_t
 		case COMMAND_ATMO:
 		{
 			return cmd_atmo(command, response_buffer);
+		}
+		case COMMAND_ACCL:
+		{
+			return cmd_accl(command, response_buffer);
 		}
 		case COMMAND_SYSTEM:
 		{

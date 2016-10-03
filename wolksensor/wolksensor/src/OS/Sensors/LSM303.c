@@ -27,6 +27,8 @@
 #define Y_AXIS_MASK	0x0C
 #define Z_AXIS_MASK	0x30
 
+#define ADDRESS_MASK 0x80
+
 static volatile uint16_t movement_sensor_disabled_timeout = 0;
 
 static bool sensor_detected = false;
@@ -42,7 +44,7 @@ static volatile int	compass_Z;
 void (*sensors_states_listener)(sensor_state_t* sensors_states, uint8_t sensors_count) = NULL;
 
 static char I2C_ReadRegisterLSM(char rAddr) {
-	tmp_data[0] = 0x80 + rAddr;
+	tmp_data[0] = rAddr;
 	bool  timeout=false;
 
 	TWI_MasterWriteRead(&sensor_twi, 0x19, tmp_data, 1, 1);
@@ -54,10 +56,15 @@ static char I2C_ReadRegisterLSM(char rAddr) {
 
 int16_t GetX()
 {
-	uint8_t xlow = I2C_ReadRegisterLSM(0x28);
-	uint8_t xhigh = I2C_ReadRegisterLSM(0x29);
+	uint8_t xlow = I2C_ReadRegisterLSM(0xA8);
+	uint8_t xhigh = I2C_ReadRegisterLSM(0xA9);
 
-	int16_t xaxis = (int16_t)(((xhigh << 8) | xlow) >> 4);
+	int16_t xaxis = (int16_t)((xlow | (xhigh << 8)) >> 4);
+
+	LOG_PRINT(1,PSTR("X axis high : 0x%x\n"),xhigh);
+	LOG_PRINT(1,PSTR("X axis low : 0x%x\n"),xlow);
+
+	LOG_PRINT(1,PSTR("X axis : %d\n"),xaxis);
 
 	return xaxis;
 }
@@ -70,21 +77,39 @@ bool LSM303_init(void) {
 
 	LOG(3,"LSM303 - 1");
 	twi_buff[0] = 0x80 + 0x20;
-	twi_buff[1] = 0b01110111;		// REG1, 400Hz, enable XYZ
-	twi_buff[2] = 0b00110000;		// REG2, High pass filter, cut-off 0.125Hz, don't use filtered data
-	twi_buff[3] = 0b01000000;		// REG3, AOI1 signal on INT1
-	twi_buff[2] = 0b10001000;		// REG4, full scale 2G
-	twi_buff[5] = 0b10001100;		// REG5, latched interrupt on INT1
-	twi_buff[6] = 0b01000000;		// REG6. interrupt active high
+	twi_buff[1] = 0b01110111;		// REG1, 400Hz, Normal Mode, ZYX enabled
+	twi_buff[2] = 0b00000000;		// REG2,
+	twi_buff[3] = 0b01000000;		// REG3, AOI1 INT1 enabled
+	twi_buff[4] = 0b10001000;		// REG4, BDU enabled, High Resolution
+	twi_buff[5] = 0b00001100;		// REG5, LIR INT1, D4D INT1 enabled
+	twi_buff[6] = 0b00000000;		// REG6. interrupt active high
 	twi_buff[7] = 0b00000001;		// REFERENCE_A
 	TWI_MasterWriteRead(&sensor_twi, 0x19, twi_buff, 8, 0);
 	start_auxTimeout(10);
 	while ((sensor_twi.status != TWIM_STATUS_READY) && !timeout) {timeout=read_auxTimeout();}
 	if(timeout || (sensor_twi.result != TWIM_RESULT_OK)) return false;
 
+	uint8_t reg1 = I2C_ReadRegisterLSM(0x20);
+	LOG_PRINT(1,PSTR("REG1 : 0x%x\n\n"),reg1);
+
+	uint8_t reg2 = I2C_ReadRegisterLSM(0x21);
+	LOG_PRINT(1,PSTR("REG2 : 0x%x\n\n"),reg2);
+
+	uint8_t reg3 = I2C_ReadRegisterLSM(0x22);
+	LOG_PRINT(1,PSTR("REG3 : 0x%x\n\n"),reg3);
+
+	uint8_t reg4 = I2C_ReadRegisterLSM(0x23);
+	LOG_PRINT(1,PSTR("REG4 : 0x%x\n\n"),reg4);
+
+	uint8_t reg5 = I2C_ReadRegisterLSM(0x24);
+	LOG_PRINT(1,PSTR("REG5 : 0x%x\n\n"),reg5);
+
+	uint8_t reg6 = I2C_ReadRegisterLSM(0x25);
+	LOG_PRINT(1,PSTR("REG6B : 0x%x\n\n"),reg6);
+
 	LOG(3,"LSM303 - 2");
 	twi_buff[0] = 0x80 + 0x30;
-	twi_buff[1] = 0b11111111;		// INT1_CFG_A, X high interrupt
+	twi_buff[1] = 0b11111111;		// INT1_CFG_A, ZYX high interrupt enabled
 	TWI_MasterWriteRead(&sensor_twi, 0x19, twi_buff, 2, 0);
 	start_auxTimeout(10);
 	while ((sensor_twi.status != TWIM_STATUS_READY) && !timeout) {timeout=read_auxTimeout();}
@@ -111,6 +136,8 @@ bool LSM303_init(void) {
 	PORTB.INTFLAGS = 0b00000001;		// clear pending int0 interrupts
 	PORTB.INTCTRL |= 0b00000011;		// interrupt 0, high level
 	LOG(1,"LSM303 detected");
+
+	GetX();
 
 	movement_sensor_enable();
 
@@ -147,6 +174,7 @@ void LSM303_poll(void)
 	LOG_PRINT(1,PSTR("Status : 0x%x\n"),status_reg);
 
 	GetX();
+
 
 	sensor_ready = true;
 

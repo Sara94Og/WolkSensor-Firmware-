@@ -333,6 +333,7 @@ void init_wolksensor(start_type_t start_type)
 	// parameters
 	load_system_heartbeat();
 	load_atmo_status();
+	load_accl_status();
 	
 	load_movement_status();
 	// for movement sensor set predefined alarm
@@ -484,6 +485,13 @@ static bool state_idle(state_machine_state_t* state, event_t* event)
 			LOG_PRINT(2, PSTR("Atmo sensor status %u\r\n"), atmo_status);
 			
 			if(atmo_status && !sensor_readings_buffer_full())
+			{
+				transition(STATE_ACQUISITION);
+			}
+
+			LOG_PRINT(2,PSTR("Accl sensor status %u\r\n"),accl_status);
+
+			if(accl_status && !sensor_readings_buffer_full())
 			{
 				transition(STATE_ACQUISITION);
 			}

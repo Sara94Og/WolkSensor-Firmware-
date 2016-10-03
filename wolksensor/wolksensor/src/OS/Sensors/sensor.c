@@ -38,6 +38,8 @@ void init_sensors(void)
 
 	SREG = saved_sreg;
 	
+	LOG(1,"INIT LSM303 : \n");
+
 	LSM303_init();
 	BME280_init();
 	batteryADC_init();

@@ -44,6 +44,7 @@ typedef enum
 	COMMAND_AUTH,
 	COMMAND_MOVEMENT,
 	COMMAND_ATMO,
+	COMMAND_ACCL,
 	COMMAND_SYSTEM,
 	COMMAND_STATIC_IP,
 	COMMAND_STATIC_MASK,
@@ -140,6 +141,9 @@ command_execution_result_t cmd_location(command_t* command, circular_buffer_t* r
 command_execution_result_t cmd_ssl(command_t* command, circular_buffer_t* response_buffer);
 command_execution_result_t cmd_mqtt_username(command_t* command, circular_buffer_t* response_buffer);
 command_execution_result_t cmd_mqtt_password(command_t* command, circular_buffer_t* response_buffer);
+
+command_execution_result_t cmd_accl(command_t* command, circular_buffer_t* response_buffer);
+
 
 #ifdef __cplusplus
 }

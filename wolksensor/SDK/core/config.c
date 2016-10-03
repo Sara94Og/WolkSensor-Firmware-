@@ -27,6 +27,8 @@ uint16_t server_port = 8883;
 bool movement_status = false;
 bool atmo_status = true;
 
+bool accl_status = true;
+
 uint8_t knx_physical_address[2] = {0, 0};
 uint8_t knx_group_address[2] = {0, 0};
 	
@@ -247,6 +249,20 @@ bool load_atmo_status(void)
 	
 	LOG(1, "Could not read atmo sensor status, defaulting to ON");
 	atmo_status = true;
+	return false;
+}
+
+bool load_accl_status(void)
+{
+	if(global_dependencies.config_read(&accl_status,CFG_ACCL,1,sizeof(accl_status)))
+	{
+		accl_status = (accl_status == 0) ? false : true;
+		LOG_PRINT(1,PSTR("Accl sensor status read %u\r\n"),accl_status);
+		return true;
+	}
+
+	LOG(1,"Could not read accl sensro status, defaulting to ON");
+	accl_status = true;
 	return false;
 }
 

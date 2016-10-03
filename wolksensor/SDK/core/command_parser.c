@@ -29,6 +29,7 @@ static const command_table_t command_table[] PROGMEM =
 	{ COMMAND_AUTH, "AUTH" },
 	{ COMMAND_MOVEMENT, "MOVEMENT" },
 	{ COMMAND_ATMO, "ATMO" },
+	{ COMMAND_ACCL, "ACCL"},
 	{ COMMAND_SYSTEM, "SYSTEM" },
 	{ COMMAND_STATIC_IP, "STATIC_IP" },
 	{ COMMAND_STATIC_MASK, "STATIC_MASK" },
@@ -287,6 +288,7 @@ static bool parse_commad_argument(command_t* command, char* argument)
 	switch (command->type) {
 		case COMMAND_MOVEMENT:
 		case COMMAND_ATMO:
+		case COMMAND_ACCL :
 		case COMMAND_KNX_NAT:
 		case COMMAND_LOCATION:
 		case COMMAND_SSL:

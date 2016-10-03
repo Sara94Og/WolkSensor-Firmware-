@@ -582,6 +582,21 @@ bool append_atmo_enabled(bool enabled, circular_buffer_t* message_buffer)
 	return true;
 }
 
+bool append_accl_enabled(bool enabled, circular_buffer_t* message_buffer)
+{
+	if (accl_status)
+	{
+		sprintf_P(tmp, PSTR("ACCL ON;"));
+	}
+	else
+	{
+		sprintf_P(tmp, PSTR("ACCL OFF;"));
+	}
+
+	circular_buffer_add_array(message_buffer, tmp, strlen(tmp));
+	return true;
+}
+
 bool append_static_ip(char* ip, circular_buffer_t* message_buffer)
 {
 	if (strcmp_P(wifi_static_ip, PSTR("")) == 0)
