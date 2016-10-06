@@ -24,4 +24,6 @@ int16_t GetX();
 int16_t GetY();
 int16_t GetZ();
 
+int16_t GetAcceleration();
+
 #endif /* LSM303_H_ */

@@ -45,12 +45,72 @@ static uint16_t serialize_sensor_reading(sensor_readings_t* sensor_reading, char
 
 	size = sprintf_P(buffer, PSTR("R:%lu,"), sensor_reading->timestamp);
 	
-	int i;
+	int i,k;
 	for(i = 0; i < NUMBER_OF_SENSORS; i++)
 	{
 		if(sensor_reading->values[i] != SENSOR_VALUE_NOT_SET)
 		{
-			size += sprintf_P(buffer + size, PSTR("%c:%d,"), sensors[i].id, sensor_reading->values[i]);
+			if(sensors[i].id == 'A')
+			{
+				int16_t acceleration = (sensor_reading->values[i]);
+
+				int16_t xaxis = (acceleration & 0xE000);
+				int16_t yaxis = (acceleration & 0x1C00);
+				int16_t zaxis = (acceleration & 0x0380);
+
+				int16_t x,y,z;
+
+				switch(xaxis)
+				{
+					case 0xC000 : x = -2; break;
+					case 0xA000 : x = -1; break;
+					case 0x0000 : x = 0; break;
+					case 0x2000 : x = 1; break;
+					case 0x4000 : x = 2; break;
+				}
+
+				switch(yaxis)
+				{
+					case 0x1800 : y = -2; break;
+					case 0x1400 : y = -1; break;
+					case 0x0000 : y = 0; break;
+					case 0x0400 : y = 1; break;
+					case 0x0800 : y = 2; break;
+				}
+
+				switch(zaxis)
+				{
+					case 0x0300 : z = -2; break;
+					case 0x0280 : z = -1; break;
+					case 0x0000 : z = 0; break;
+					case 0x0080 : z = 1; break;
+					case 0x0100 : z = 2; break;
+				}
+
+				int i = 0;
+
+				size += sprintf_P(buffer + size, PSTR("ACL:"));
+
+				if(x >= 0)
+				{
+					size += sprintf_P(buffer + size, PSTR("+%d0"),x);
+				}else
+					size += sprintf_P(buffer + size, PSTR("%d0"),x);
+
+				if(y >= 0)
+				{
+					size += sprintf_P(buffer + size, PSTR("+%d0"),y);
+				}else
+					size += sprintf_P(buffer + size, PSTR("%d0"),y);
+
+				if(z >= 0)
+				{
+					size += sprintf_P(buffer + size, PSTR("+%d00"),z);
+				}else
+					size += sprintf_P(buffer + size, PSTR("%d00"),z);
+
+				}else
+					size += sprintf_P(buffer + size, PSTR("%c:%d,"), sensors[i].id, sensor_reading->values[i]);
 		}
 	}
 	

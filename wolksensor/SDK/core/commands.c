@@ -199,9 +199,10 @@ command_execution_result_t cmd_accl(command_t* command, circular_buffer_t* respo
 		global_dependencies.config_write(&accl_status, CFG_ACCL, 1, sizeof(accl_status));
 	}
 
+	LSM303_poll();
+
 	append_accl_enabled(atmo_status, response_buffer);
 	return COMMAND_EXECUTED_SUCCESSFULLY;
-
 }
 
 

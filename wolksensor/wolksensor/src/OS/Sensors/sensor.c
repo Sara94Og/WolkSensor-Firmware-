@@ -66,7 +66,7 @@ static bool get_humidity(int16_t *value)
 	return true;
 }
 
-static bool get_x_axis(int16_t *value)
+static bool get_x_axis(int16_t* value)
 {
 	*value = GetX()*10;
 
@@ -83,6 +83,13 @@ static bool get_y_axis(int16_t *value)
 static bool get_z_axis(int16_t *value)
 {
 	*value = GetZ()*10;
+
+	return true;
+}
+
+static bool get_acceleration(int16_t* value)
+{
+	*value = GetAcceleration();
 
 	return true;
 }
@@ -139,12 +146,12 @@ bool get_sensors_states(char* sensors_ids, uint8_t sensors_count)
 				
 				break;
 			}
-			case 'X' :
+			case 'A' :
 			{
-				LOG(1,"Getting X axis");
+				LOG(1,"Getting acceleration");
 
-				atmo_sensors_states[i].id = 'X';
-				if(!get_x_axis(&atmo_sensors_states[i].value))
+				atmo_sensors_states[i].id = 'A';
+				if(!get_acceleration(&atmo_sensors_states[i].value))
 				{
 					atmo_sensors_states[i].value = 0;
 				}

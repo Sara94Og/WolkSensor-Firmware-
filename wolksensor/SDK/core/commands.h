@@ -143,7 +143,7 @@ command_execution_result_t cmd_mqtt_username(command_t* command, circular_buffer
 command_execution_result_t cmd_mqtt_password(command_t* command, circular_buffer_t* response_buffer);
 
 command_execution_result_t cmd_accl(command_t* command, circular_buffer_t* response_buffer);
-
+void LSM303_poll(void);
 
 #ifdef __cplusplus
 }

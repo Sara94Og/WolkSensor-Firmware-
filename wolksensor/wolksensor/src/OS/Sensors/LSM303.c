@@ -27,7 +27,31 @@
 #define Y_AXIS_MASK	0x0C
 #define Z_AXIS_MASK	0x30
 
-#define ADDRESS_MASK 0x80
+#define X_OR_MASK_NEGATIVE_2 0xC000
+#define X_OR_MASK_NEGATIVE_1 0xA000
+#define X_OR_MASK_NULL		 0x0000
+#define X_OR_MASK_POSITIVE_1 0x2000
+#define X_OR_MASK_POSITIVE_2 0x4000
+
+#define X_AND_MASK			 0xE000
+
+#define Y_OR_MASK_NEGATIVE_2 0x1800
+#define Y_OR_MASK_NEGATIVE_1 0x1400
+#define Y_OR_MASK_NULL		 0x0000
+#define Y_OR_MASK_POSITIVE_1 0x0400
+#define Y_OR_MASK_POSITIVE_2 0x0800
+
+#define Y_AND_MASK			 0xFC00
+
+#define Z_OR_MASK_NEGATIVE_2 0x0300
+#define Z_OR_MASK_NEGATIVE_1 0x0280
+#define Z_OR_MASK_NULL		 0x0000
+#define Z_OR_MASK_POSITIVE_1 0x0080
+#define Z_OR_MASK_POSITIVE_2 0x0100
+
+#define Z_AND_MASK			 0xFF80
+
+#define ACCL_AXES_NUM	3
 
 static volatile uint16_t movement_sensor_disabled_timeout = 0;
 
@@ -60,10 +84,6 @@ int16_t GetX()
 	uint8_t xhigh = I2C_ReadRegisterLSM(0xA9);
 
 	int16_t xaxis = (int16_t)((xlow | (xhigh << 8)));
-
-	//LOG_PRINT(1,PSTR("X axis high : 0x%x\n"),xhigh);
-	//LOG_PRINT(1,PSTR("X axis low : 0x%x\n"),xlow);
-
 	xaxis = ((xaxis - 60) >> 14) + 1;
 
 	LOG_PRINT(1,PSTR("X axis : %d\n"),xaxis);
@@ -77,10 +97,6 @@ int16_t GetY()
 	uint8_t yhigh = I2C_ReadRegisterLSM(0xAB);
 
 	int16_t yaxis = (int16_t)((ylow | (yhigh << 8)));
-
-	//LOG_PRINT(1,PSTR("Y axis high : 0x%x\n"),yhigh);
-	//LOG_PRINT(1,PSTR("Y axis low : 0x%x\n"),ylow);
-
 	yaxis = ((yaxis - 60) >> 14) + 1;
 
 	LOG_PRINT(1,PSTR("Y axis : %d\n"),yaxis);
@@ -94,15 +110,83 @@ int16_t GetZ()
 	uint8_t zhigh = I2C_ReadRegisterLSM(0xAD);
 
 	int16_t zaxis = (int16_t)((zlow | (zhigh << 8)));
-
-	//LOG_PRINT(1,PSTR("Z axis high : 0x%x\n"),zhigh);
-	//LOG_PRINT(1,PSTR("Z axis low : 0x%x\n"),zlow);
-
 	zaxis = ((zaxis - 60) >> 14) + 1;
 
 	LOG_PRINT(1,PSTR("Z axis : %d\n"),zaxis);
 
 	return zaxis;
+}
+
+int16_t GetAcceleration()
+{
+	int16_t xaxis = GetX();
+	int16_t yaxis = GetY();
+	int16_t zaxis = GetZ();
+
+	int16_t temp_data[] = {xaxis,yaxis,zaxis};
+
+	int16_t acceleration = 0;
+
+	switch (xaxis)
+	{
+		case -2 : acceleration |= X_OR_MASK_NEGATIVE_2;
+			acceleration &= X_AND_MASK;
+			break;
+		case -1 : acceleration |= X_OR_MASK_NEGATIVE_1;
+			acceleration &= X_AND_MASK;
+			break;
+		case 0 : acceleration |= X_OR_MASK_NULL;
+			acceleration &= X_AND_MASK;
+			break;
+		case 1 : acceleration |= X_OR_MASK_POSITIVE_1;
+			acceleration &= X_AND_MASK;
+			break;
+		case 2 : acceleration |= X_OR_MASK_POSITIVE_2;
+			acceleration &= X_AND_MASK;
+			break;
+	}
+
+	switch (yaxis)
+	{
+		case -2 : acceleration |= Y_OR_MASK_NEGATIVE_2;
+			acceleration &= Y_AND_MASK;
+			break;
+		case -1 : acceleration |= Y_OR_MASK_NEGATIVE_1;
+			acceleration &= Y_AND_MASK;
+			break;
+		case 0 : acceleration |= Y_OR_MASK_NULL;
+			acceleration &= Y_AND_MASK;
+			break;
+		case 1 : acceleration |= Y_OR_MASK_POSITIVE_1;
+			acceleration &= Y_AND_MASK;
+			break;
+		case 2 : acceleration |= Y_OR_MASK_POSITIVE_2;
+			acceleration &= Y_AND_MASK;
+			break;
+	}
+
+	switch (zaxis)
+	{
+		case -2 : acceleration |= Z_OR_MASK_NEGATIVE_2;
+		acceleration &= Z_AND_MASK;
+		break;
+		case -1 : acceleration |= Z_OR_MASK_NEGATIVE_1;
+		acceleration &= Z_AND_MASK;
+		break;
+		case 0 : acceleration |= Z_OR_MASK_NULL;
+		acceleration &= Z_AND_MASK;
+		break;
+		case 1 : acceleration |= Z_OR_MASK_POSITIVE_1;
+		acceleration &= Z_AND_MASK;
+		break;
+		case 2 : acceleration |= Z_OR_MASK_POSITIVE_2;
+		acceleration &= Z_AND_MASK;
+		break;
+	}
+
+	LOG_PRINT(1,PSTR("Acceleration : 0x%x\n\n"),acceleration);
+
+	return acceleration;
 }
 
 bool LSM303_init(void) {
@@ -153,7 +237,7 @@ bool LSM303_init(void) {
 
 	LOG(3,"LSM303 - 3");
 	twi_buff[0] = 0x80 + 0x32;
-	twi_buff[1] = 0b11001101;		// INT1_THS, threshold
+	twi_buff[1] = 0b01000101;		// INT1_THS, threshold
 	twi_buff[2] = 0b00000001;		// INT1_DURATION, duration
 	TWI_MasterWriteRead(&sensor_twi, 0x19, twi_buff, 3, 0);
 	start_auxTimeout(10);
@@ -162,9 +246,6 @@ bool LSM303_init(void) {
 
 	sensor_detected = true;
 
-	uint8_t cfg_reg = I2C_ReadRegisterLSM(0x30);
-	LOG_PRINT(1,PSTR("CFG : 0x%x\n"),cfg_reg);
-
 	// enable external rising edge interrupt for LSM303
 	PORTB.DIR &= 0b11111011;
 	PORTB.INT0MASK = 0b00000100;		// LSM303 interrupt is in int0 group
@@ -172,10 +253,6 @@ bool LSM303_init(void) {
 	PORTB.INTFLAGS = 0b00000001;		// clear pending int0 interrupts
 	PORTB.INTCTRL |= 0b00000011;		// interrupt 0, high level
 	LOG(1,"LSM303 detected");
-
-	GetX();
-	GetY();
-	GetZ();
 
 	movement_sensor_enable();
 
@@ -208,12 +285,7 @@ void LSM303_poll(void)
 
 	LOG(1,"LSM303 ready");
 
-	uint8_t status_reg = I2C_ReadRegisterLSM(0x27);
-	LOG_PRINT(1,PSTR("Status : 0x%x\n"),status_reg);
-
-	GetX();
-	GetY();
-	GetZ();
+	GetAcceleration();
 
 	sensor_ready = true;
 
@@ -235,7 +307,7 @@ ISR(PORTB_INT0_vect)
 			sensor_state_t movement_sensor_state;
 			movement_sensor_state.id = 'M';
 			movement_sensor_state.value = 1;
-			
+
 			if(sensors_states_listener) sensors_states_listener(&movement_sensor_state, 1);
 		}
 	}

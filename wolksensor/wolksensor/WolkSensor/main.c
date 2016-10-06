@@ -214,7 +214,7 @@ static void set_sensors_types(void)
 	sensors[3].type = NOTIFIES_VALUE;
 	sensors[3].alarm_type = ALARM_TYPE_NOTIFY_ALWAYS;
 
-	sensors[4].id = 'X';
+	sensors[4].id = 'A';
 	sensors[4].type = VALUE_ON_DEMAND;
 	sensors[4].alarm_type = ALARM_TYPE_NOTIFY_ONCE;
 }
